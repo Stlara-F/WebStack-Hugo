@@ -1,15 +1,22 @@
 #!/bin/bash
 set -e
 
-# 定义复制函数，仅在源目录存在且非空时执行覆盖
-copy_if_exists() {
-    if [ -d "$1" ] && [ -n "$(ls -A $1 2>/dev/null)" ]; then
-        echo "  - Copying $1 to $2"
-        cp -rf $1/* $2/
+# 自动填充空的数据目录（如果挂载的目录为空，则从镜像默认位置复制）
+populate_if_empty() {
+    local source_dir=$1
+    local target_dir=$2
+    if [ -d "$target_dir" ] && [ -z "$(ls -A $target_dir 2>/dev/null)" ]; then
+        echo "Populating $target_dir with default content from $source_dir"
+        cp -r $source_dir/. $target_dir/
     fi
 }
 
-# 1. 处理单文件配置（原有逻辑）
+# 填充数据目录（仅在宿主机挂载目录为空时执行）
+populate_if_empty /app/exampleSite /data/exampleSite
+populate_if_empty /app/layouts    /data/layouts
+populate_if_empty /app/static     /data/static
+
+# 处理单文件配置（原有逻辑，保持不变）
 if [ -f /config/config.toml ]; then
     cp /config/config.toml /app/exampleSite/config.toml
     echo "  - config.toml updated"
@@ -20,16 +27,14 @@ if [ -f /config/webstack.yml ]; then
     echo "  - webstack.yml updated"
 fi
 
-# 2. 处理目录覆盖（新增）
-echo "Checking for custom directories..."
-copy_if_exists /data/exampleSite /app/exampleSite
-copy_if_exists /data/layouts    /app/layouts
-copy_if_exists /data/static     /app/static
-
-# 3. 重新生成静态文件（只要有任一配置或目录变更，就执行）
+# 重新生成静态文件（如果有任何配置或目录变更）
 if [ -f /config/config.toml ] || [ -f /config/webstack.yml ] || \
    [ -d /data/exampleSite ] || [ -d /data/layouts ] || [ -d /data/static ]; then
     echo "Regenerating static site..."
+    # 先同步数据目录到 /app 下
+    [ -d /data/exampleSite ] && cp -rf /data/exampleSite/. /app/exampleSite/
+    [ -d /data/layouts ] && cp -rf /data/layouts/. /app/layouts/
+    [ -d /data/static ] && cp -rf /data/static/. /app/static/
     cd /app/exampleSite
     hugo --minify --destination /usr/share/nginx/html
     echo "Static site regenerated."
@@ -37,5 +42,5 @@ else
     echo "No custom config or directories provided, using default built-in static files."
 fi
 
-# 4. 启动 Nginx
+# 启动 Nginx
 nginx -g "daemon off;"
