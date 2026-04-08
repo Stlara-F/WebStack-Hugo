@@ -8,7 +8,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - /opt/webstackhugo/config:/config:ro
-      - /opt/webstackhugo/data/exampleSite:/data/exampleSite:ro
-      - /opt/webstackhugo/data/layouts:/data/layouts:ro
-      - /opt/webstackhugo/data/static:/data/static:ro
+      - /opt/webstackhugo/config:/config
+      - /opt/webstackhugo/data/exampleSite:/data/exampleSite
+      - /opt/webstackhugo/data/layouts:/data/layouts
+      - /opt/webstackhugo/data/static:/data/static
