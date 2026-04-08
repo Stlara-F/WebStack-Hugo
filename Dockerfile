@@ -1,5 +1,5 @@
-# 第一阶段：构建 Hugo 静态文件（与原相同）
-FROM hugomods/hugo:latest as builder
+# 第一阶段：构建 Hugo 静态文件
+FROM hugomods/hugo:latest AS builder
 
 WORKDIR /src
 COPY . .
@@ -19,8 +19,8 @@ FROM nginx:1-alpine-slim
 # 安装 bash（用于启动脚本）
 RUN apk add --no-cache bash
 
-# 从 builder 阶段复制 hugo 二进制
-COPY --from=builder /usr/local/bin/hugo /usr/local/bin/hugo
+# 从 builder 阶段复制 hugo 二进制（修正路径为 /usr/bin/hugo）
+COPY --from=builder /usr/bin/hugo /usr/local/bin/hugo
 
 # 复制整个源码（包括主题、exampleSite、配置模板）到 /app
 WORKDIR /app
