@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   webstack:
     image: dockeruserstlara/webstackhugo:latest
@@ -7,4 +8,4 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - /opt/webstackhugo/config:/config:ro 
+      - /opt/webstackhugo/data:/app:ro
