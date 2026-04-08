@@ -16,10 +16,10 @@ RUN hugo --minify
 # 第二阶段：运行时镜像（基于 Nginx，并加入 Hugo 支持动态生成）
 FROM nginx:1-alpine-slim
 
-# 安装 bash（用于启动脚本）
-RUN apk add --no-cache bash
+# 安装 bash 和 C++ 运行时库（解决 hugo 依赖）
+RUN apk add --no-cache bash libstdc++
 
-# 从 builder 阶段复制 hugo 二进制（修正路径为 /usr/bin/hugo）
+# 从 builder 阶段复制 hugo 二进制
 COPY --from=builder /usr/bin/hugo /usr/local/bin/hugo
 
 # 复制整个源码（包括主题、exampleSite、配置模板）到 /app
@@ -36,4 +36,3 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-
