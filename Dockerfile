@@ -1,4 +1,4 @@
-# 第一阶段：构建 Hugo 静态文件
+# 第一阶段：构建 Hugo 静态文件（与原相同）
 FROM hugomods/hugo:latest as builder
 
 WORKDIR /src
@@ -10,14 +10,29 @@ RUN mkdir -p /src/exampleSite/themes/WebStack-Hugo && \
 
 WORKDIR /src/exampleSite
 
-# 构建站点（主题已放置在正确位置）
+# 构建站点（主题已放置在正确位置）— 生成默认静态文件
 RUN hugo --minify
 
-# 第二阶段：使用 Nginx 提供静态文件（使用 slim 版本减少漏洞）
+# 第二阶段：运行时镜像（基于 Nginx，并加入 Hugo 支持动态生成）
 FROM nginx:1-alpine-slim
 
-# 复制构建好的静态文件
+# 安装 bash（用于启动脚本）
+RUN apk add --no-cache bash
+
+# 从 builder 阶段复制 hugo 二进制
+COPY --from=builder /usr/local/bin/hugo /usr/local/bin/hugo
+
+# 复制整个源码（包括主题、exampleSite、配置模板）到 /app
+WORKDIR /app
+COPY --from=builder /src /app/
+
+# 复制第一阶段生成的默认静态文件到 Nginx 默认目录（作为后备）
 COPY --from=builder /src/exampleSite/public /usr/share/nginx/html
 
+# 复制启动脚本
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
