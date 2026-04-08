@@ -4,11 +4,14 @@ FROM hugomods/hugo:latest as builder
 WORKDIR /src
 COPY . .
 
-# 进入示例站点目录
+# 将主题源码放到 exampleSite/themes/WebStack-Hugo 下
+RUN mkdir -p /src/exampleSite/themes && \
+    cp -r /src /src/exampleSite/themes/WebStack-Hugo
+
 WORKDIR /src/exampleSite
 
-# 生成静态网站，指定主题目录为上级目录
-RUN hugo --minify --themesDir ../..
+# 构建站点（配置文件 config.toml 中应已指定 theme = "WebStack-Hugo"）
+RUN hugo --minify
 
 # 第二阶段：使用 Nginx 提供静态文件
 FROM nginx:alpine
