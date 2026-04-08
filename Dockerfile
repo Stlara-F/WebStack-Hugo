@@ -13,8 +13,8 @@ WORKDIR /src/exampleSite
 # 构建站点（主题已放置在正确位置）
 RUN hugo --minify
 
-# 第二阶段：使用 Nginx 提供静态文件
-FROM nginx:alpine
+# 第二阶段：使用 Nginx 提供静态文件（使用 slim 版本减少漏洞）
+FROM nginx:1-alpine-slim
 
 # 复制构建好的静态文件
 COPY --from=builder /src/exampleSite/public /usr/share/nginx/html
