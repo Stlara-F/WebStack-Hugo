@@ -1,47 +1,41 @@
 #!/bin/bash
 set -e
 
-# 定义默认站点目录
-SITE_DIR="/app/exampleSite"
-
-# 如果用户提供了完整的 exampleSite 目录，则直接替换整个站点
-if [ -d "/data/exampleSite" ]; then
-    echo "Detected custom /data/exampleSite, replacing default site..."
-    rm -rf "$SITE_DIR"
-    cp -r /data/exampleSite "$SITE_DIR"
-else
-    echo "No full exampleSite provided, applying incremental overrides..."
-
-    # 单独覆盖配置文件
-    if [ -f "/data/config.toml" ]; then
-        cp /data/config.toml "$SITE_DIR/config.toml"
-        echo "  - config.toml updated"
+# 定义复制函数，仅在源目录存在且非空时执行覆盖
+copy_if_exists() {
+    if [ -d "$1" ] && [ -n "$(ls -A $1 2>/dev/null)" ]; then
+        echo "  - Copying $1 to $2"
+        cp -rf $1/* $2/
     fi
+}
 
-    if [ -f "/data/webstack.yml" ]; then
-        cp /data/webstack.yml "$SITE_DIR/data/webstack.yml"
-        echo "  - webstack.yml updated"
-    fi
-
-    # 覆盖 layouts 目录（如果存在）
-    if [ -d "/data/layouts" ]; then
-        mkdir -p "$SITE_DIR/layouts"
-        cp -r /data/layouts/* "$SITE_DIR/layouts/"
-        echo "  - layouts/ overridden"
-    fi
-
-    # 覆盖 static 目录（如果存在）
-    if [ -d "/data/static" ]; then
-        mkdir -p "$SITE_DIR/static"
-        cp -r /data/static/* "$SITE_DIR/static/"
-        echo "  - static/ overridden"
-    fi
+# 1. 处理单文件配置（原有逻辑）
+if [ -f /config/config.toml ]; then
+    cp /config/config.toml /app/exampleSite/config.toml
+    echo "  - config.toml updated"
 fi
 
-# 重新生成静态文件到 Nginx 目录
-echo "Generating static site..."
-cd "$SITE_DIR"
-hugo --minify --destination /usr/share/nginx/html
+if [ -f /config/webstack.yml ]; then
+    cp /config/webstack.yml /app/exampleSite/data/webstack.yml
+    echo "  - webstack.yml updated"
+fi
 
-echo "Starting Nginx..."
+# 2. 处理目录覆盖（新增）
+echo "Checking for custom directories..."
+copy_if_exists /data/exampleSite /app/exampleSite
+copy_if_exists /data/layouts    /app/layouts
+copy_if_exists /data/static     /app/static
+
+# 3. 重新生成静态文件（只要有任一配置或目录变更，就执行）
+if [ -f /config/config.toml ] || [ -f /config/webstack.yml ] || \
+   [ -d /data/exampleSite ] || [ -d /data/layouts ] || [ -d /data/static ]; then
+    echo "Regenerating static site..."
+    cd /app/exampleSite
+    hugo --minify --destination /usr/share/nginx/html
+    echo "Static site regenerated."
+else
+    echo "No custom config or directories provided, using default built-in static files."
+fi
+
+# 4. 启动 Nginx
 nginx -g "daemon off;"
