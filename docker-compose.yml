@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  webstack:
+    image: dockeruserstlara/webstackhugo:latest
+    container_name: webstack-hugo
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - /opt/webstackhugo/config:/config:ro 
