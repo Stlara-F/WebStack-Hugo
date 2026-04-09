@@ -1,3 +1,33 @@
+该 fork 使用 Github Actions 自动构建并推送至 dockerhub ， fork 新增代码完全由AI完成
+
+```
+docker run -d --name webstack-hugo --restart always -p 8080:80 -v /opt/webstackhugo/config:/config -v /opt/webstackhugo/data/exampleSite:/data/exampleSite -v /opt/webstackhugo/data/layouts:/data/layouts -v /opt/webstackhugo/data/static:/data/static dockeruserstlara/webstackhugo:latest
+```
+或
+```
+mkdir /opt/webstackhugo
+vi /opt/webstackhugo/docker-compose.yml
+```
+```
+version: '3.8'
+
+services:
+  webstack:
+    image: dockeruserstlara/webstackhugo:latest
+    container_name: webstack-hugo
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - /opt/webstackhugo/config:/config
+      - /opt/webstackhugo/data/exampleSite:/data/exampleSite
+      - /opt/webstackhugo/data/layouts:/data/layouts
+      - /opt/webstackhugo/data/static:/data/static
+```
+```
+docker-compose up -d
+```
+
 > [!NOTE]
 > **2025年05月17日：更多新功能，请参考：<https://github.com/PageXHub> 项目！**
 
