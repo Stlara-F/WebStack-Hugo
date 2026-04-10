@@ -14,7 +14,8 @@ WORKDIR /src/exampleSite
 RUN hugo --minify
 
 # 第二阶段：运行时镜像（基于 Nginx，并加入 Hugo 支持动态生成）
-FROM nginx:1-alpine-slim
+FROM nginx:1.28-alpine-slim
+RUN apk upgrade --no-cache
 
 # 安装 bash 和 C++ 运行时库（解决 hugo 依赖）
 RUN apk add --no-cache bash libstdc++
