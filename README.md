@@ -1,7 +1,7 @@
 该 fork 使用 Github Actions 自动构建并推送至 dockerhub ， fork 新增代码完全由AI完成
 
 ```
-docker run -d --name webstack-hugo --restart always -p 8080:80 -v /opt/webstackhugo/config:/config -v /opt/webstackhugo/data/exampleSite:/data/exampleSite -v /opt/webstackhugo/data/layouts:/data/layouts -v /opt/webstackhugo/data/static:/data/static dockeruserstlara/webstackhugo:latest
+docker run -d --name webstack-hugo --restart always -p 8080:80 -v /opt/webstackhugo/config:/config -v /opt/webstackhugo/data:/data dockeruserstlara/webstackhugo:latest
 ```
 或
 ```
@@ -20,9 +20,7 @@ services:
       - "8080:80"
     volumes:
       - /opt/webstackhugo/config:/config
-      - /opt/webstackhugo/data/exampleSite:/data/exampleSite
-      - /opt/webstackhugo/data/layouts:/data/layouts
-      - /opt/webstackhugo/data/static:/data/static
+      - /opt/webstackhugo/data:/data
 ```
 ```
 docker-compose up -d
