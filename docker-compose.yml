@@ -9,6 +9,4 @@ services:
       - "8080:80"
     volumes:
       - /opt/webstackhugo/config:/config
-      - /opt/webstackhugo/data/exampleSite:/data/exampleSite
-      - /opt/webstackhugo/data/layouts:/data/layouts
-      - /opt/webstackhugo/data/static:/data/static
+      - /opt/webstackhugo/data:/data
