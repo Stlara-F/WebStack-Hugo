@@ -2,7 +2,7 @@ name: code-sync
 
 on:
   push:
-    branches: [main]
+#    branches: [main]
 
 jobs:
   push-to-mirror:
