@@ -1,5 +1,6 @@
 # 第一阶段：构建 Hugo 静态文件
-FROM hugomods/hugo:latest AS builder
+FROM alpine:latest AS builder
+RUN apk add --no-cache hugo git
 
 WORKDIR /src
 COPY . .
